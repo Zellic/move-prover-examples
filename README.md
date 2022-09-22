@@ -136,8 +136,8 @@ spec sum {
 ```
 
 Now when we run the verifier, we see no errors. When writing `aborts_if`
-clauses, it is good to know that once you have at least one written---or the
-`aborts_if_is_strict` pragma is set---then the abort conditions must exactly
+clauses, it is good to know that once you have at least one written—or the
+`aborts_if_is_strict` pragma is set—then the abort conditions must exactly
 cover when the function will abort. To disable this behavior, set the
 `aborts_if_is_partial` pragma to true.
 
@@ -171,7 +171,7 @@ module address::step_3 {
 
 Running the prover, we see that this verifies. Because we provide the
 precondition that `first + second` will not overflow, our assertion that
-`sum` will not abort (`aborts_if false` gets verified).
+`sum` will not abort (`aborts_if false`) gets verified.
 
 Now, what if we call `sum` in a way that violates its preconditions?
 
@@ -486,10 +486,10 @@ Testing with `move prove --path step-6`, everything verifies properly.
 
 # Step 7: Invariants, part two <span id="step-7"></span>
 
-One of the trickest parts of using the prover is dealing with loops. An early
-step of the proving processes involves performing a topological sort on the
-control flow graph. However, this is impossible if the graph has cycles, so
-loops are handled in a special way.
+One of the trickest parts of using the prover is dealing with loops. In the
+prover internals, an early step of the proving processes involves performing a
+topological sort on the control flow graph. However, this is impossible if the
+graph has cycles, so loops are handled in a special way.
 
 Specifically, Move tries to prove loops by using induction. After you provide
 loop invariants, the prover checks that
@@ -601,7 +601,7 @@ integer will reach a minimum of 1 within a few thousand steps. However, putting
 work, we would have to write an inductive proof that the stopping time of every
 64-bit input is less than 10,000, and add it as a loop invariant. No general
 proof bounding stopping times exists at this time, though it may be possible to
-find one for the restricted inputs.
+find one for the restricted input size.
 
 Though writing loop invariants can be hard, we can still use them to do some
 pretty cool stuff. Let's say we write a utility function `max` that finds the
@@ -663,4 +663,4 @@ fun max(values: &vector<u64>): u64 {
 
 Essentially, we hold the invariant that `max` holds the maximum of the sublist
 seen so far. As in the specification, we also assert that `max` is actually in
-the vector.
+the vector. Now with this invariant, our function gets verified properly.
