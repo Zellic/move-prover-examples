@@ -2,6 +2,7 @@
 
 An example-based guide to getting started with the Move prover.
 
+- [Introduction](#introduction)
 - [Step 0: Installation](#step-0)
 - [Step 1: First specification](#step-1)
 - [Step 2: Aborts](#step-2)
@@ -11,24 +12,49 @@ An example-based guide to getting started with the Move prover.
 - [Step 6: Invariants](#step-6)
 - [Step 7: Invariants, part two](#step-7)
 
+## Introduction <span id="introduction"></span>
+
+The Move Prover is a tool for formally verifying the correctness of smart
+contracts written in Move. It is designed to be fast and practical—something
+that can really be used in the code development process. This is something it
+achieves: the prover nearly always runs in minutes or less, and has been used
+to verify all the Move in the Diem framework.
+
+The Move smart contract language was designed with formal verification in mind.
+For instance, its use of Rust-like borrow semantics, lack of dynamic dispatch,
+and limited state interaction APIs all make program analysis more
+straightforward. Further, the Move language is developed alongside the Move
+specification language, which is more expressive than the language itself.
+
+Despite the power of the Move Prover and its huge influence on the language
+design, many existing Move contracts we have seen do not utilize it to the
+fullest. Among other reasons may be difficulty in getting started with the
+specification language: though it is [reasonably documented][1], there aren't
+many examples provided.
+
+This resource aims to provide a gentle introduction to writing specifications
+and using the prover to make Move contracts more secure.
+
+[1]: https://github.com/move-language/move/blob/main/language/move-prover/doc/user/spec-lang.md
+
 ## Step 0: Installation <span id="step-0"></span>
 
-The prover comes with the Move cli. Install it using [cargo][1].
+The prover comes with the Move cli. Install it using [cargo][2].
 
 ```sh
 cargo install --git https://github.com/move-language/move move-cli
 ```
 
 The prover also depends on the Boogie verifier and a backend SMT solver.
-Either install Boogie and [z3][2] with your preferred package manager or use
-the [dev setup script][3] provided by Move.
+Either install Boogie and [z3][3] with your preferred package manager or use
+the [dev setup script][4] provided by Move.
 
 Finally, the prover looks for the Boogie and z3 environment variables in the
 `Z3_EXE` and `BOOGIE_EXE` environment variables. Make sure these are set.
 
-[1]: https://github.com/rust-lang/cargo/
-[2]: https://github.com/Z3Prover/z3
-[3]: https://github.com/move-language/move/blob/main/scripts/dev_setup.sh
+[2]: https://github.com/rust-lang/cargo/
+[3]: https://github.com/Z3Prover/z3
+[4]: https://github.com/move-language/move/blob/main/scripts/dev_setup.sh
 
 ## Step 1: First specification <span id="step-1"></span>
 
