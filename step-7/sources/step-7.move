@@ -16,7 +16,7 @@ module address::step_7 {
     }
 
     spec looper {
-        ensures input == 50;
+        ensures result == 50;
     }
 
     fun max(values: &vector<u64>): u64 {
