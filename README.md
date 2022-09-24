@@ -751,7 +751,7 @@ the vector. Now with this invariant, our function gets verified properly.
 
 There are a number of features in the Move specification language that this
 introduction does not yet cover. As time goes on, we expect to continue
-updating this resource with more examples---especially as the language itself
+updating this resource with more examples—especially as the language itself
 continues to evolve. In the meantime, be sure to check out the
 [official documentation][5] for more details.
 
