@@ -593,7 +593,7 @@ module address::step_8 {
     }
 
     spec looper {
-        ensures input == 50;
+        ensures result == 50;
     }
 }
 ```
@@ -602,23 +602,21 @@ Although this is clearly true, the prover cannot verify it.
 
 ```
 error: post-condition does not hold
-   ┌─ ./sources/step-8.move:11:9
+   ┌─ ./sources/step-8.move:13:9
    │
-11 │         ensures input == 50;
-   │         ^^^^^^^^^^^^^^^^^^^^
+13 │         ensures result == 50;
+   │         ^^^^^^^^^^^^^^^^^^^^^
    │
-   =     at ./sources/step-7.move:2: looper
+   =     at ./sources/step-8.move:4: looper
    =         input = 91
-   =     at ./sources/step-7.move:3: looper
+   =     at ./sources/step-8.move:5: looper
    =         input = 50
-   =     at ./sources/step-7.move:4: looper
+   =     at ./sources/step-8.move:6: looper
    =     enter loop, variable(s) input havocked and reassigned
    =         input = 51
-   =     at ./sources/step-7.move:7: looper
+   =     at ./sources/step-8.move:9: looper
    =         result = 51
-   =     at ./sources/step-7.move:11: looper (spec)
-
-Error: exiting with verification errors
+   =     at ./sources/step-8.move:13: looper (spec)
 ```
 
 This is because we need to write a loop invariant. Here is one that works.
@@ -640,7 +638,7 @@ module address::step_8 {
     }
 
     spec looper {
-        ensures input == 50;
+        ensures result == 50;
     }
 }
 ```
