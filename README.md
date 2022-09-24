@@ -12,6 +12,7 @@ An example-based guide to getting started with the Move prover.
 - [Step 6: Operators and Quantifiers](#step-6)
 - [Step 7: Invariants](#step-7)
 - [Step 8: Invariants, part two](#step-8)
+- [Conclusion](#conclusion)
 
 ## Introduction <span id="introduction"></span>
 
@@ -745,3 +746,18 @@ fun max(values: &vector<u64>): u64 {
 Essentially, we hold the invariant that `max` holds the maximum of the sublist
 seen so far. As in the specification, we also assert that `max` is actually in
 the vector. Now with this invariant, our function gets verified properly.
+
+## Conclusion
+
+There are a number of features in the Move specification language that this
+introduction does not yet cover. As time goes on, we expect to continue
+updating this resource with more examples---especially as the language itself
+continues to evolve. In the meantime, be sure to check out the
+[official documentation][5] for more details.
+
+If you find any mistakes, see places for improvement, or want to add another
+section, issues and pull requests are more than welcome. We hope that this very
+practical tool for program verification becomes more accessible as Move becomes
+more prevalant.
+
+[5]: https://github.com/move-language/move/blob/main/language/move-prover/doc/user/spec-lang.md
