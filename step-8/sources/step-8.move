@@ -1,4 +1,4 @@
-module address::step_7 {
+module address::step_8 {
     use std::vector;
 
     fun looper(input: u64): u64 {

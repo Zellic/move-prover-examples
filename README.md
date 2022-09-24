@@ -9,8 +9,9 @@ An example-based guide to getting started with the Move prover.
 - [Step 3: Preconditions](#step-3)
 - [Step 4: Helper functions](#step-4)
 - [Step 5: State](#step-5)
-- [Step 6: Invariants](#step-6)
-- [Step 7: Invariants, part two](#step-7)
+- [Step 6: Operators and Quantifiers](#step-6)
+- [Step 7: Invariants](#step-7)
+- [Step 8: Invariants, part two](#step-8)
 
 ## Introduction <span id="introduction"></span>
 
@@ -24,7 +25,8 @@ The Move smart contract language was designed with formal verification in mind.
 For instance, its use of Rust-like borrow semantics, lack of dynamic dispatch,
 and limited state interaction APIs all make program analysis more
 straightforward. Further, the Move language is developed alongside the Move
-specification language, which is more expressive than the language itself.
+specification language (MSL), which is more expressive than the language
+itself.
 
 Despite the power of the Move Prover and its huge influence on the language
 design, many existing Move contracts we have seen do not utilize it to the
@@ -303,7 +305,7 @@ module address::account {
 
 Now, let's write a spec for `create_account`.
 
-```
+```move
 spec create_account {
     aborts_if exists<Account>(signer::address_of(s));
     ensures exists<Account>(signer::address_of(s));
@@ -318,7 +320,7 @@ includes many builtin helper functions for working with `vector`s, like
 
 To clean up our code, let's write a few helper functions of our own:
 
-```
+```move
 spec fun address_of(s: signer): address { signer::address_of(s) }
 spec fun balance(a: address): u64 { global<Account>(a).balance }
 
@@ -424,7 +426,7 @@ Now, let's prove that `transfer` works properly. Specifically, the balance of
 `from` should decrease by `amount` and the balance of `to` should increase by
 `amount`.
 
-```
+```move
 ensures balance(from) == old(balance(from)) - amount;
 ensures balance(to) == old(balance(to)) + amount;
 ```
@@ -434,7 +436,7 @@ After the prover with `move prove --path step-5`, we see it verifies!
 As an aside, it's good to know that function specifications can only access
 arguments (as opposed to intermediate variables) and do not respect
 reassignment. For instance, consider the following two functions.
-```
+```move
 fun inc_one(num: &mut u64) {
     *num = *num + 1;
 }
@@ -448,10 +450,63 @@ If `inc_one` were called on `10`, then in its spec, `num` would be `11` while
 `old(num)` would be `10`. However, if `inc_two` were called on `10`, both
 `num` and `old(num)` would have value `10`.
 
-# Step 6: Invariants <span id="step-6"></span>
+# Step 6: Operators and Quantifiers <span id="step-6"></span>
 
-Suppose we want to add a maximum balance for each `Account`. We can do this by
-adding a check in `deposit`.
+In the Move specification language, all relevant Move operators are supported.
+However, the MSL provides a few additional ones as well. For instance, consider
+the following function:
+
+```move
+fun first_or_second(condition: bool, a: u64, b: u64): u64 {
+    if (condition) { a } else { b }
+}
+```
+
+Now, to write a spec for this, we could just use our standard logical
+operators.
+
+```move
+spec first_or_second {
+    ensures condition && result == a || !condition && result == b;
+}
+```
+
+However, this is a bit unnatural. We can use the MSL's implication operator
+instead!
+
+```move
+spec first_or_second {
+    ensures condition ==> result == a;
+    ensures !condition ==> result == b;
+}
+```
+
+Another very powerful aspect of the Move prover is that it supports
+quantifiers. We can write assertions about the _existence_ of things using
+`exists` and about _all_ members of a domain using `forall`. For instance, we
+can claim that a vector is sorted.
+
+```move
+fun ordered_vector(): vector<u8> {
+    vector[1, 2, 3, 4, 5]
+}
+
+spec ordered_vector {
+    ensures forall i in 0..len(result), j in 0..len(result) where i < j:
+        result[i] <= result[j];
+}
+```
+
+Note that this also uses some more operators specific to the specification
+language! For instance, we use the range constructor `0..len(result)` to
+declare bounds on the indices `i` and `j`. Also, we can index the `result`
+vector using square brackets.
+
+# Step 7: Invariants <span id="step-7"></span>
+
+Let's return to the `coin` module from earlier. Suppose we want to add a
+maximum balance for each `Account`. We can do this by adding a check in
+`deposit`.
 
 ```move
 const MAX_BALANCE: u64 = 1000;
@@ -465,7 +520,9 @@ fun deposit(target: address, amount: u64) acquires Account {
 
 Of course, we update our `deposit` and `transfer` specifications to reflect
 this possible abort. Now, we can write a global invariant to guarantee that the
-balance can never increase above the maximum anywhere in the program.
+balance can never increase above the maximum anywhere in the program. Note that
+this invariant is not inside a specification block; it sits directly in the
+module.
 
 ```move
 invariant forall a: address where exists<Account>(a):
@@ -508,9 +565,9 @@ fun deposit(target: address, amount: u64) acquires Account {
 }
 ```
 
-Testing with `move prove --path step-6`, everything verifies properly.
+Testing with `move prove --path step-7`, everything verifies properly.
 
-# Step 7: Invariants, part two <span id="step-7"></span>
+# Step 8: Invariants, part two <span id="step-8"></span>
 
 One of the trickest parts of using the prover is dealing with loops. In the
 prover internals, an early step of the proving processes involves performing a
@@ -526,7 +583,7 @@ loop invariants, the prover checks that
 For instance, consider this simple case:
 
 ```move
-module address::step_7 {
+module address::step_8 {
     fun looper(input: u64): u64 {
         input = if (input < 50) input else 50;
         while (input < 50) {
@@ -545,7 +602,7 @@ Although this is clearly true, the prover cannot verify it.
 
 ```
 error: post-condition does not hold
-   ┌─ ./sources/step-7.move:11:9
+   ┌─ ./sources/step-8.move:11:9
    │
 11 │         ensures input == 50;
    │         ^^^^^^^^^^^^^^^^^^^^
@@ -567,7 +624,7 @@ Error: exiting with verification errors
 This is because we need to write a loop invariant. Here is one that works.
 
 ```move
-module address::step_7 {
+module address::step_8 {
     fun looper(input: u64): u64 {
         input = if (input < 50) input else 50;
         while ({
